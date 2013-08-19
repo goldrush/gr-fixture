@@ -4,81 +4,79 @@ import java.io.File
 import java.nio.channels.FileChannel
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import scala.swing._
+import scala.swing.event._
 
-object App {
+object App extends SimpleSwingApplication {
 
-  def main(args: Array[String]): Unit = {
-
-    //input check
-    args.length match {
-      case 0 => throw new IllegalArgumentException("第一引数にFixtureファイルのパスを指定してください。")
-      case _ =>
+  def top = new MainFrame {
+    title = "Fixtures Creater"
+    minimumSize = new Dimension(400, 100)
+    centerOnScreen
+    contents = new BoxPanel(Orientation.Vertical) {
+      contents += combo
+      contents += inPanel
+      contents += outPanel
+      contents += button
     }
-
-    val inputFile = new File(args(0))
-    if (!inputFile.exists()) {
-      throw new IllegalArgumentException("ファイルが存在しません。" + inputFile.getName())
-    }
-
-    inputFile.getPath() match {
-      case f if f.endsWith("xls") =>
-      case f if f.endsWith("xlsx") =>
-      case _ => throw new IllegalArgumentException("Excelファイルではありません。" + inputFile.getName())
-    }
-
-    val outPath = inputFile.getCanonicalPath().lastIndexOf(".") match {
-      case i if i > 0 => inputFile.getCanonicalPath().substring(0, i)
-      case _ => inputFile.getCanonicalPath()
-    }
-
-    val outDirectory = new File(outPath)
-    outDirectory match {
-      case o if o.exists() == false => {
-        throw new IllegalArgumentException("出力先フォルダが存在しません。" + outDirectory.getPath())
-      }
-      case o if o.isDirectory() == false => {
-        throw new IllegalArgumentException("出力先がフォルダではありません。" + outDirectory.getPath())
-      }
-      case _ =>
-    }
-
-    //Fixture Create
-    println(f"fixturesを[${outPath}]に作成します。")
-    FixtureCreator.create(inputFile.getPath(), outPath)
-    println("fixturesを作成しました。")
-
-    //end process
-    val basePath = outDirectory.getParentFile().getParentFile().getParentFile().getCanonicalPath
-    println(basePath)
-    val copyPath = outDirectory.getName() match {
-      case "develop" => joinPath(basePath, "Base", "fixtures", "develop")
-      case "init" => joinPath(basePath, "Base", "fixtures", "init")
-      case "test" => joinPath(basePath, "Base", "test", "fixtures")
-      case _ => ""
-    }
-    if (copyPath != "") waitUserInput(outPath, copyPath)
-
+    updatePath(combo.selection.item)
   }
 
-  def waitUserInput(outPath: String, copyPath: String): Unit = {
-    print(f"\nfixturesを[${copyPath}]にコピーしますか？(y/n):")
-    readChar match {
-      case 'y' => {
-        copyFixture(outPath, copyPath)
-        println("コピーしました。")
-      }
-      case 'n' => println("終了します。")
-      case _ => waitUserInput(outPath, copyPath)
+  def inPanel: BoxPanel = new BoxPanel(Orientation.Horizontal) {
+    contents += new Label("In Path :")
+    contents += inPathText
+  }
+
+  def outPanel: BoxPanel = new BoxPanel(Orientation.Horizontal) {
+    contents += new Label("Out Path:")
+    contents += outPathText
+  }
+
+  val combo = new ComboBox(Array("init", "develop", "test")) {
+    listenTo(selection)
+    reactions += {
+      case e: SelectionChanged => updatePath(selection.item)
     }
   }
 
-  def copyFixture(fromDirPath: String, toDirPath: String) = {
-    val fromDir = new File(fromDirPath)
-    fromDir.listFiles.foreach(f => {
-      val inputChannel = (new FileInputStream(f)).getChannel
-      val outputChannel = new FileOutputStream(toDirPath + "/" + f.getName())
-      outputChannel.getChannel.transferFrom(inputChannel, 0, inputChannel.size)
-    })
+  val button = new Button {
+    text = "Create"
+    reactions += {
+      case e: ButtonClicked => execute(inPathText.text, outPathText.text)
+    }
+  }
+
+  val basePath = System.getProperty("user.dir")
+  val inPathText = new TextField("")
+  val outPathText = new TextField("")
+
+  def updatePath(str: String) = {
+    inPathText.text = joinPath(basePath, str) + ".xls"
+    outPathText.text = joinPath(basePath, str)
+  }
+
+  def execute(inPath: String, outPath: String) = {
+    try {
+      checkInPath(inPath)
+      checkOutPath(outPath)
+      FixtureCreator.create(inPath, outPath)
+      Dialog.showMessage(message = "fixturesを[" + outPath + "'に作成しました。")
+    } catch {
+      case e: Exception => Dialog.showMessage(message = e.getMessage())
+    }
+  }
+
+  def checkInPath(inPath: String) = {
+    if ((new File(inPath)).exists() == false) {
+      throw new IllegalArgumentException("ファイルが存在しません。" + inPath)
+    }
+  }
+
+  def checkOutPath(outPath: String) = {
+    val file = new File(outPath)
+    if (file.exists() == false) {
+      file.mkdirs()
+    }
   }
 
   def joinPath(pathes: String*): String = pathes.foldLeft("") { (s, p) => (new File(s, p)).getPath() }
