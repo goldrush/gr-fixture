@@ -11,7 +11,7 @@ object App extends SimpleSwingApplication {
 
   def top = new MainFrame {
     title = "Fixtures Creater"
-    minimumSize = new Dimension(400, 100)
+    minimumSize = new Dimension(600, 100)
     centerOnScreen
     contents = new BoxPanel(Orientation.Vertical) {
       contents += combo
@@ -60,7 +60,7 @@ object App extends SimpleSwingApplication {
       checkInPath(inPath)
       checkOutPath(outPath)
       FixtureCreator.create(inPath, outPath)
-      Dialog.showMessage(message = "fixturesを[" + outPath + "'に作成しました。")
+      Dialog.showMessage(message = "fixturesを[" + outPath + "]に作成しました。")
     } catch {
       case e: Exception => Dialog.showMessage(message = e.getMessage())
     }
