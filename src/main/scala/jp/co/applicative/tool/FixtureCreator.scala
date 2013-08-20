@@ -72,7 +72,7 @@ object FixtureCreator {
 
   def writeFixture(data: String, path: String, fileName: String) = {
     if (data.isEmpty() == false) {
-      val writer = new OutputStreamWriter(new FileOutputStream(new File(path, fileName), false), "UTF-8")
+      val writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(path, fileName), false), "UTF-8")))
       writer.write(data)
       writer.close()
     }
