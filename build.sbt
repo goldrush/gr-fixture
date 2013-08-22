@@ -1,6 +1,6 @@
 import AssemblyKeys._
 
-name := "FixtureCreater"
+name := "gr-fixture"
 
 organization := "jp.co.applicative.tool"
 
@@ -15,6 +15,6 @@ libraryDependencies ++= Seq(
   "org.apache.poi" % "poi" % "3.9"
 )
 
-initialCommands := "import jp.co.applicative.tool.FixtureCreater._"
+initialCommands := "import jp.co.applicative.tool.grfixture._"
 
 assemblySettings

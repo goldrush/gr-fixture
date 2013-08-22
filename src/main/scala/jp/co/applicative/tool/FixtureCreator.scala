@@ -20,7 +20,6 @@ object FixtureCreator {
       val sheetName = wb.getSheetName(i)
       writeFixture(sheetProc(wb.getSheetAt(i), sheetName), outPath, sheetName + ".yml")
     }
-
   }
 
   def sheetProc(sheet: HSSFSheet, sheetName: String): String = {
@@ -32,7 +31,7 @@ object FixtureCreator {
     while (itr.hasNext()) {
       val row = itr.next().asInstanceOf[HSSFRow]
       row.getRowNum() match {
-        case 0 =>	//skip header row
+        case 0 => //skip header row
         case _ => if (PoiHelper.getCellValue(row.getCell(0)) != "") {
           map += (f"${sheetName}_${row.getRowNum()}" -> rowProc(headerRow, row))
         }
@@ -47,9 +46,10 @@ object FixtureCreator {
     val itr = header.cellIterator()
     while (itr.hasNext()) {
       val key = itr.next().asInstanceOf[HSSFCell]
+      val value = PoiHelper.getCellValue(row.getCell(key.getCellNum())).toString
       PoiHelper.getCellValue(key).toString match {
-        case k if k.endsWith("$") => map += (k.substring(0, k.length() - 1) -> escape(PoiHelper.getCellValue(row.getCell(key.getCellNum()))))
-        case k => map += (k -> PoiHelper.getCellValue(row.getCell(key.getCellNum())))
+        case k if (!k.endsWith("$") || value.lines.length > 1) => map += (k -> value)
+        case k => map += (k.substring(0, k.length() - 1) -> escape(value))
       }
     }
     return map
