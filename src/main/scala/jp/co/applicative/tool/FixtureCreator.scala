@@ -48,7 +48,8 @@ object FixtureCreator {
       val key = itr.next().asInstanceOf[HSSFCell]
       val value = PoiHelper.getCellValue(row.getCell(key.getCellNum())).toString
       PoiHelper.getCellValue(key).toString match {
-        case k if (!k.endsWith("$") || value.lines.length > 1) => map += (k -> value)
+        case k if (!k.endsWith("$")) => map += (k -> value)
+        case k if (value.lines.length > 1) => map += (k.substring(0, k.length() - 1) -> value)
         case k => map += (k.substring(0, k.length() - 1) -> escape(value))
       }
     }

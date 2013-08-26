@@ -16,6 +16,7 @@ object App extends SimpleSwingApplication {
     contents = new BoxPanel(Orientation.Vertical) {
       contents += combo
       contents += inPanel
+      contents += outDirPanel
       contents += outPanel
       contents += button
     }
@@ -25,6 +26,11 @@ object App extends SimpleSwingApplication {
   def inPanel: BoxPanel = new BoxPanel(Orientation.Horizontal) {
     contents += new Label("In Path :")
     contents += inPathText
+  }
+
+  def outDirPanel: BoxPanel = new BoxPanel(Orientation.Horizontal) {
+    contents += new Label("Out Dir :")
+    contents += outDirText
   }
 
   def outPanel: BoxPanel = new BoxPanel(Orientation.Horizontal) {
@@ -46,13 +52,23 @@ object App extends SimpleSwingApplication {
     }
   }
 
-  val basePath = System.getProperty("user.dir")
+  val appPath = System.getProperty("user.dir")
   val inPathText = new TextField("")
+  val outDirText = new TextField(joinPath((new File((new File(appPath)).getParent())).getParent(), "Base")) {
+    reactions += {
+      case e: ValueChanged => updatePath(combo.selection.item)
+    }
+  }
   val outPathText = new TextField("")
 
-  def updatePath(str: String) = {
-    inPathText.text = joinPath(basePath, str) + ".xls"
-    outPathText.text = joinPath(basePath, str)
+  def updatePath(str: String): Unit = {
+    inPathText.text = joinPath(appPath, str) + ".xls"
+    outPathText.text = str match {
+      case "init" => joinPath(outDirText.text, "fixtures", "init")
+      case "develop" => joinPath(outDirText.text, "fixtures", "develop")
+      case "test" => joinPath(outDirText.text, "test", "fixtures")
+      case _ => outDirText.text
+    }
   }
 
   def execute(inPath: String, outPath: String) = {
