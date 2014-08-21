@@ -16,6 +16,6 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "2.2.1" % "test"
 )
 
-initialCommands := "import jp.co.applicative.tool.grfixture._"
+initialCommands := "import jp.co.applicative.tool._"
 
 assemblySettings
