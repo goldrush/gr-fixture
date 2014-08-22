@@ -8,7 +8,7 @@ import org.apache.poi.ss.usermodel.DateUtil
 
 object PoiHelper {
 
-  def getCellValue(cell: HSSFCell): Any = {
+  def getCellValue(cell: HSSFCell): String = {
     if (cell == null) return ""
     cell.getCellType() match {
       case Cell.CELL_TYPE_BLANK => ""
@@ -18,7 +18,7 @@ object PoiHelper {
         cell match {
           case c if DateUtil.isCellDateFormatted(c) => c.getDateCellValue()
           case c => c.getNumericCellValue() match {
-            case v if v == v.intValue => v.intValue
+            case v if v == v.intValue => v.intValue.toString // match式の型がDoubleになり'1.0'となる為、事前にtoString
             case v => v
           }
         }
@@ -29,5 +29,5 @@ object PoiHelper {
       }
       case _ => ""
     }
-  }
+  }.toString
 }
