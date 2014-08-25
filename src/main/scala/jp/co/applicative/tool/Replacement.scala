@@ -8,7 +8,7 @@ trait Replacement {
   def replaceSpecialWord(target: String): String = {
     var str = target
     replaceTable.keys.foreach { key =>
-      str = str replaceAll (str, replaceTable.getOrElse(str, str))
+      str = str replaceAll (key, replaceTable(key))
     }
     str
   }
