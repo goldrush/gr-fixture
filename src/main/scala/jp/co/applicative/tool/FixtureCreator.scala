@@ -6,9 +6,12 @@ import org.apache.poi.ss.usermodel.Cell
 import scala.collection.mutable.LinkedHashMap
 import scala.collection.JavaConversions._
 
-object FixtureCreator {
+object FixtureCreator extends Replacement {
 
   val DOUBLEQUOTE = """""""
+  val replaceTable = Map(
+    """%current_date%""" -> """<%= Time.now.to_s(:db) %>"""
+  )
 
   def create(inPath: String, outPath: String): Unit = {
 
@@ -46,7 +49,7 @@ object FixtureCreator {
     val itr = header.cellIterator()
     while (itr.hasNext()) {
       val key = itr.next().asInstanceOf[HSSFCell]
-      val value = PoiHelper.getCellValue(row.getCell(key.getCellNum()))
+      val value = replaceSpecialWord(PoiHelper.getCellValue(row.getCell(key.getCellNum())))
       PoiHelper.getCellValue(key) match {
         case k if (!k.endsWith("$")) => map += (k -> value)
         case k if (value.lines.length > 1) => map += (k.substring(0, k.length() - 1) -> value)
